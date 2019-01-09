@@ -1,66 +1,133 @@
 <template>
-  <section class="container">
-    <div>
-      <logo/>
-      <h1 class="title">
-        martingale-simulator
-      </h1>
-      <h2 class="subtitle">
-        My scrumtrulescent Nuxt.js project
-      </h2>
-      <div class="links">
-        <a
-          href="https://nuxtjs.org/"
-          target="_blank"
-          class="button--green">Documentation</a>
-        <a
-          href="https://github.com/nuxt/nuxt.js"
-          target="_blank"
-          class="button--grey">GitHub</a>
+  <div class="container mt-3">
+    <h4>Martingale Testing</h4>
+    <br/>
+    <h4>Conditions</h4>
+    <div id="condition-contain">
+      <div class="input-group mt-3">
+        <div class="input-group-prepend">
+          <label class="input-group-text">Total Assets</label>
+        </div>
+        <input type="number" class="form-control" v-model="total">
+      </div>
+      <div class="input-group mt-3">
+        <div class="input-group-prepend">
+          <label class="input-group-text">Bet Amount</label>
+        </div>
+        <input type="number" class="form-control" v-model="betAmount" step="10">
+      </div>
+      <div class="input-group mt-3">
+        <div class="input-group-prepend">
+          <label class="input-group-text">Win Rate</label>
+        </div>
+        <input type="number" class="form-control" v-model="winRate">
+        <div class="input-group-append">
+          <span class="input-group-text">%</span>
+        </div>
+      </div>
+      <div class="input-group mt-3">
+        <div class="input-group-prepend">
+          <label class="input-group-text">Reture Factor</label>
+        </div>
+        <input type="number" class="form-control" v-model="returnFactor">
+      </div>
+      <!-- <div class="input-group mt-3">
+        <div class="input-group-prepend">
+          <label class="input-group-text">Leave Threshold</label>
+        </div>
+        <input type="number" class="form-control" v-model="leaveThreshold">
+      </div> -->
+      <div class="input-group mt-3">
+        <div class="input-group-prepend">
+          <label class="input-group-text">Play Times</label>
+        </div>
+        <input type="number" class="form-control" v-model="playTimes">
+      </div>
+      <div class="mt-3">
+        <button class="btn btn-info" @click="simulate(1)">Martingale Simulate</button>
+      </div>
+      <div class="mt-3">
+        <button class="btn btn-info" @click="simulate(2)">Another Simulate</button>
       </div>
     </div>
-  </section>
+    <br/>
+    <h4>Result</h4>
+    <div>
+      <div class="mb-3">
+        Win: {{winTimes}}, Lose: {{loseTimes}}, Result Assets: {{final}}
+      </div>
+      <b-table striped hover :items="result"></b-table>
+    </div>
+  </div>
 </template>
 
 <script>
-import Logo from '~/components/Logo.vue'
 
 export default {
-  components: {
-    Logo
+  methods: {
+    simulate(type) {
+      console.log(6);
+      let total = this.total;
+      this.result = [];
+      this.winTimes = 0;
+      this.loseTimes = 0;
+      
+      for (let i = 0; i < this.playTimes; i++) {
+        let betAmount;
+        if (type == 1) {
+          betAmount = this.betAmount * Math.pow(2, this.conter);
+        } else {
+          betAmount = this.betAmount * (1 + this.conter);
+        }
+        if (total < betAmount) {
+          this.conter = 0;
+          break;
+        }
+        const random = Math.floor(Math.random() * 100) + 1;
+        if (random <= this.winRate) {
+          total +=  betAmount * this.returnFactor;
+          this.result.push({
+            result: 'win',
+            betAmount: betAmount,
+            total: total
+          });
+          this.conter = 0;
+          this.winTimes += 1;
+        } else {
+          total -= betAmount;
+          this.result.push({
+            result: 'lose',
+            betAmount: betAmount,
+            total: total
+          });
+          this.conter += 1;
+          this.loseTimes += 1;
+        }
+      }
+      this.final = total;
+      console.log(this.result);
+    }
+  },
+  data: () => {
+    return {
+      total: 10000,
+      betAmount: 10,
+      winRate: 49,
+      returnFactor: 2,
+      leaveThreshold: 0,
+      playTimes: 1000,
+      conter: 0,
+      result: [],
+      winTimes: 0,
+      loseTimes: 0,
+      final: 0,
+    }
   }
 }
 </script>
 
 <style>
-
-.container {
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-}
-
-.title {
-  font-family: 'Quicksand', 'Source Sans Pro', -apple-system, BlinkMacSystemFont,
-    'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  display: block;
-  font-weight: 300;
-  font-size: 100px;
-  color: #35495e;
-  letter-spacing: 1px;
-}
-
-.subtitle {
-  font-weight: 300;
-  font-size: 42px;
-  color: #526488;
-  word-spacing: 5px;
-  padding-bottom: 15px;
-}
-
-.links {
-  padding-top: 15px;
-}
+  #condition-contain {
+    width: 200px;
+  }
 </style>
